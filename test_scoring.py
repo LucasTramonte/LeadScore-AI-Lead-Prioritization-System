@@ -58,25 +58,25 @@ def main():
         
         print("\n=== INTERPRETATION ===")
         if result['priority'] == 'High':
-            print("🔥 HIGH PRIORITY LEAD!")
-            print("   → Immediate follow-up recommended")
-            print("   → Assign to senior sales rep")
-            print("   → Schedule demo/meeting ASAP")
+            print("HIGH PRIORITY LEAD!")
+            print("   - Immediate follow-up recommended")
+            print("   - Assign to senior sales rep")
+            print("   - Schedule demo/meeting ASAP")
         elif result['priority'] == 'Medium':
-            print("⚡ MEDIUM PRIORITY LEAD")
-            print("   → Follow-up within 24-48 hours")
-            print("   → Send targeted content")
-            print("   → Monitor engagement")
+            print("MEDIUM PRIORITY LEAD")
+            print("   - Follow-up within 24-48 hours")
+            print("   - Send targeted content")
+            print("   - Monitor engagement")
         else:
-            print("📋 LOW PRIORITY LEAD")
-            print("   → Add to nurturing campaign")
-            print("   → Monitor for engagement changes")
+            print("LOW PRIORITY LEAD")
+            print("   - Add to nurturing campaign")
+            print("   - Monitor for engagement changes")
         
         print("\n=== SUCCESS! ===")
         print("The AI model successfully scored your lead!")
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"Error: {str(e)}")
         print("Make sure you have trained a model first by running: python train_model.py")
 
 if __name__ == "__main__":

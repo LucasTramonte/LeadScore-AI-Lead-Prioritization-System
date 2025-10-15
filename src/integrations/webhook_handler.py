@@ -12,10 +12,9 @@ import hashlib
 import hmac
 import json
 from datetime import datetime
-import asyncio
 import os
 
-from .pipedrive_client import PipedriveClient, PipedriveDataMapper
+from .pipedrive_client import PipedriveDataMapper
 from .automation_engine import AutomationEngine
 from ..api.main import score_lead_async
 

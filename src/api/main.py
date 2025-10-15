@@ -3,7 +3,7 @@ FastAPI application for LeadScore AI REST API.
 Provides endpoints for lead scoring and model management.
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
@@ -15,7 +15,6 @@ from concurrent.futures import ThreadPoolExecutor
 import uvicorn
 
 from ..scoring.lead_scorer import LeadScorer
-from ..scoring.batch_scorer import BatchScorer
 from ..model.model_persistence import ModelPersistence
 
 # Configure logging

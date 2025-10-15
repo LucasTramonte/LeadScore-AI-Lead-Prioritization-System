@@ -5,7 +5,7 @@ Handles large-scale lead scoring operations with performance optimization.
 
 import pandas as pd
 import numpy as np
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 import logging
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -33,6 +33,30 @@ class BatchScorer:
         self.config = config or {}
         self.lead_scorer = LeadScorer(model_path, config)
         self.data_loader = DataLoader(config)
+    
+    def _process_batches(self, leads_data: List[Dict[str, Any]], batch_size: int = 1000) -> List[Dict[str, Any]]:
+        """
+        Common batch processing logic to avoid code duplication.
+        
+        Args:
+            leads_data: List of lead dictionaries
+            batch_size: Number of leads to process at once
+            
+        Returns:
+            List of scoring results
+        """
+        results = []
+        total_batches = (len(leads_data) + batch_size - 1) // batch_size
+        
+        for i in range(0, len(leads_data), batch_size):
+            batch_num = i // batch_size + 1
+            logger.info(f"Processing batch {batch_num}/{total_batches}")
+            
+            batch_leads = leads_data[i:i+batch_size]
+            batch_results = self.lead_scorer.score_leads_batch(batch_leads)
+            results.extend(batch_results)
+        
+        return results
         
     def score_from_file(self, input_file: str, output_file: Optional[str] = None,
                        batch_size: int = 1000, include_details: bool = False) -> Dict[str, Any]:
@@ -59,20 +83,13 @@ class BatchScorer:
         
         logger.info(f"Loaded {len(df)} leads from {input_file}")
         
-        # Score in batches
-        results = []
-        total_batches = (len(df) + batch_size - 1) // batch_size
+        # Convert to leads data and use common batch processing
+        leads_data = df.to_dict('records')
+        for i, lead in enumerate(leads_data):
+            if 'lead_id' not in lead:
+                lead['lead_id'] = f'lead_{i}'
         
-        for i in range(0, len(df), batch_size):
-            batch_num = i // batch_size + 1
-            logger.info(f"Processing batch {batch_num}/{total_batches}")
-            
-            batch_df = df.iloc[i:i+batch_size]
-            batch_leads = batch_df.to_dict('records')
-            
-            # Score batch
-            batch_results = self.lead_scorer.score_leads_batch(batch_leads)
-            results.extend(batch_results)
+        results = self._process_batches(leads_data, batch_size)
         
         # Create results DataFrame
         results_df = pd.DataFrame(results)
@@ -121,26 +138,14 @@ class BatchScorer:
         """
         logger.info(f"Scoring {len(df)} leads from DataFrame")
         
-        # Convert to list of dictionaries
+        # Convert to list of dictionaries and add lead_id if not present
         leads_data = df.to_dict('records')
-        
-        # Add lead_id if not present
         for i, lead in enumerate(leads_data):
             if 'lead_id' not in lead:
                 lead['lead_id'] = f'lead_{i}'
         
-        # Score in batches
-        results = []
-        total_batches = (len(leads_data) + batch_size - 1) // batch_size
-        
-        for i in range(0, len(leads_data), batch_size):
-            batch_num = i // batch_size + 1
-            logger.info(f"Processing batch {batch_num}/{total_batches}")
-            
-            batch_leads = leads_data[i:i+batch_size]
-            batch_results = self.lead_scorer.score_leads_batch(batch_leads)
-            results.extend(batch_results)
-        
+        # Use common batch processing logic
+        results = self._process_batches(leads_data, batch_size)
         return pd.DataFrame(results)
     
     def score_with_parallel_processing(self, leads_data: List[Dict[str, Any]], 

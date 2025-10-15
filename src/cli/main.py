@@ -10,13 +10,15 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 
+import pandas as pd
+from sklearn.metrics import roc_auc_score, average_precision_score
+
 from ..data.data_loader import DataLoader
 from ..data.data_validator import DataValidator
-from ..model.model_trainer import ModelTrainer
-from ..model.model_evaluator import ModelEvaluator
 from ..model.model_persistence import ModelPersistence
 from ..scoring.lead_scorer import LeadScorer
 from ..scoring.batch_scorer import BatchScorer
+from ..services.training_service import TrainingService
 
 # Configure logging
 logging.basicConfig(
@@ -24,6 +26,26 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+def load_data_file(file_path: str, data_loader: DataLoader = None) -> pd.DataFrame:
+    """
+    Helper function to load data from Excel or CSV files.
+    
+    Args:
+        file_path: Path to the data file
+        data_loader: Optional DataLoader instance
+        
+    Returns:
+        DataFrame with loaded data
+    """
+    if data_loader is None:
+        data_loader = DataLoader()
+    
+    if file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+        return data_loader.load_excel_data(file_path)
+    else:
+        return pd.read_csv(file_path)
 
 
 def setup_train_parser(subparsers):
@@ -112,13 +134,13 @@ def train_model(args):
         if not is_valid:
             logger.warning(f"Data validation issues: {validation_errors}")
         
-        # Train model
-        trainer = ModelTrainer(config)
-        training_results = trainer.train_final_model(df, args.target_column)
+        # Train model using TrainingService
+        from ..core.config_manager import get_config
+        config_manager = get_config() if not config else config
+        training_service = TrainingService(config_manager)
+        training_results = training_service.run_training_pipeline(args.model_name)
         
-        # Save model
-        persistence = ModelPersistence(config)
-        model_path = persistence.save_model_artifacts(training_results, args.model_name)
+        model_path = f"models/{training_results['model_saved_as']}"
         
         logger.info(f"Model training completed successfully!")
         logger.info(f"Best model: {training_results['best_model_name']}")
@@ -147,13 +169,8 @@ def score_leads(args):
         # Initialize batch scorer
         batch_scorer = BatchScorer(args.model)
         
-        # Validate input data
-        data_loader = DataLoader()
-        if args.input.endswith('.xlsx') or args.input.endswith('.xls'):
-            df = data_loader.load_excel_data(args.input)
-        else:
-            import pandas as pd
-            df = pd.read_csv(args.input)
+        # Load input data
+        df = load_data_file(args.input)
         
         validation_results = batch_scorer.validate_input_data(df)
         if not validation_results['is_valid']:
@@ -220,33 +237,51 @@ def evaluate_model(args):
         batch_scorer = BatchScorer(args.model)
         results_df = batch_scorer.score_dataframe(df)
         
-        # Evaluate performance
-        evaluator = ModelEvaluator()
+        # Simple evaluation using sklearn metrics
         y_true = df[args.target_column].values
         y_pred_proba = results_df['conversion_probability'].values
         
-        evaluation_report = evaluator.generate_evaluation_report(
-            y_true, y_pred_proba, model_info['thresholds'], model_info['model_type']
-        )
+        # Calculate basic metrics
+        auc_score = roc_auc_score(y_true, y_pred_proba)
+        avg_precision = average_precision_score(y_true, y_pred_proba)
+        
+        # Priority-based analysis
+        results_with_truth = results_df.copy()
+        results_with_truth['actual_converted'] = y_true
+        
+        priority_analysis = {}
+        for priority in ['High', 'Medium', 'Low']:
+            priority_data = results_with_truth[results_with_truth['priority'] == priority]
+            if len(priority_data) > 0:
+                conversion_rate = priority_data['actual_converted'].mean()
+                count = len(priority_data)
+                priority_analysis[priority] = {
+                    'count': count,
+                    'conversion_rate': conversion_rate,
+                    'percentage': count / len(results_with_truth) * 100
+                }
         
         # Print results
         print(f"\n=== MODEL EVALUATION RESULTS ===")
         print(f"Model: {model_info['model_type']}")
-        print(f"AUC Score: {evaluation_report['binary_classification_metrics']['auc_score']:.4f}")
-        print(f"Average Precision: {evaluation_report['binary_classification_metrics']['average_precision']:.4f}")
+        print(f"AUC Score: {auc_score:.4f}")
+        print(f"Average Precision: {avg_precision:.4f}")
         
         print(f"\n=== PRIORITY PERFORMANCE ===")
-        for priority, metrics in evaluation_report['lead_scoring_performance']['priority_metrics'].items():
+        for priority, metrics in priority_analysis.items():
             print(f"{priority:6} Priority: {metrics['count']:4d} leads ({metrics['percentage']:5.1f}%) | "
-                  f"Conversion: {metrics['conversion_rate']:.1%} | Lift: {metrics['lift']:.2f}x")
-        
-        print(f"\n=== BUSINESS IMPACT ===")
-        business_impact = evaluation_report['business_impact']
-        print(f"Conversion Capture Rate: {business_impact['conversion_capture_rate']:.1%}")
-        print(f"High Priority Conversions: {business_impact['high_priority_conversions']}/{business_impact['total_conversions']}")
+                  f"Conversion: {metrics['conversion_rate']:.1%}")
         
         # Save report if requested
         if args.output:
+            evaluation_report = {
+                'model_type': model_info['model_type'],
+                'auc_score': float(auc_score),
+                'average_precision': float(avg_precision),
+                'priority_analysis': priority_analysis,
+                'total_samples': len(results_with_truth),
+                'overall_conversion_rate': float(y_true.mean())
+            }
             with open(args.output, 'w') as f:
                 json.dump(evaluation_report, f, indent=2, default=str)
             logger.info(f"Evaluation report saved to: {args.output}")
@@ -332,12 +367,7 @@ def validate_data(args):
     """Validate data quality."""
     try:
         # Load data
-        data_loader = DataLoader()
-        if args.data.endswith('.xlsx') or args.data.endswith('.xls'):
-            df = data_loader.load_excel_data(args.data)
-        else:
-            import pandas as pd
-            df = pd.read_csv(args.data)
+        df = load_data_file(args.data)
         
         # Validate data
         validator = DataValidator()
@@ -348,7 +378,7 @@ def validate_data(args):
         print(f"File: {args.data}")
         print(f"Total Records: {len(df):,}")
         print(f"Total Columns: {len(df.columns)}")
-        print(f"Overall Valid: {'✓' if is_valid else '✗'}")
+        print(f"Overall Valid: {'Yes' if is_valid else 'No'}")
         
         if not is_valid:
             print(f"\n=== VALIDATION ERRORS ===")

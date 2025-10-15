@@ -11,7 +11,7 @@ from sklearn.metrics import (
     roc_auc_score, classification_report, confusion_matrix,
     precision_recall_curve, roc_curve, average_precision_score
 )
-from sklearn.model_selection import cross_val_score, learning_curve
+from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 
