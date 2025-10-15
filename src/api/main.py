@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
+from contextlib import asynccontextmanager
 import logging
 from datetime import datetime
 import asyncio
@@ -21,13 +22,57 @@ from ..model.model_persistence import ModelPersistence
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Global variables for caching
+_default_scorer = None
+_model_cache = {}
+_app_start_time = datetime.now()
+
+def get_default_scorer() -> LeadScorer:
+    """Get or create default scorer instance."""
+    global _default_scorer
+    if _default_scorer is None:
+        try:
+            # Get the latest model
+            persistence = ModelPersistence()
+            models_df = persistence.list_saved_models()
+            if len(models_df) == 0:
+                raise HTTPException(status_code=503, detail="No trained models available")
+            
+            latest_model = models_df.iloc[0]['model_name']
+            _default_scorer = LeadScorer(latest_model)
+            logger.info(f"Loaded default scorer with model: {latest_model}")
+        except Exception as e:
+            logger.error(f"Failed to load default scorer: {str(e)}")
+            raise HTTPException(status_code=503, detail=f"Failed to load scoring model: {str(e)}")
+    
+    return _default_scorer
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan events."""
+    # Startup
+    logger.info("Starting LeadScore AI API...")
+    try:
+        # Pre-load default scorer
+        get_default_scorer()
+        logger.info("API startup completed successfully")
+    except Exception as e:
+        logger.error(f"API startup failed: {str(e)}")
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down LeadScore AI API...")
+    executor.shutdown(wait=True)
+
 # Initialize FastAPI app
 app = FastAPI(
     title="LeadScore AI API",
     description="REST API for AI-powered lead scoring and prioritization",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -102,31 +147,6 @@ class HealthResponse(BaseModel):
     version: str = "1.0.0"
     models_available: int
     uptime_seconds: float
-
-# Global variables for caching
-_default_scorer = None
-_model_cache = {}
-_app_start_time = datetime.now()
-
-def get_default_scorer() -> LeadScorer:
-    """Get or create default scorer instance."""
-    global _default_scorer
-    if _default_scorer is None:
-        try:
-            # Get the latest model
-            persistence = ModelPersistence()
-            models_df = persistence.list_saved_models()
-            if len(models_df) == 0:
-                raise HTTPException(status_code=503, detail="No trained models available")
-            
-            latest_model = models_df.iloc[0]['model_name']
-            _default_scorer = LeadScorer(latest_model)
-            logger.info(f"Loaded default scorer with model: {latest_model}")
-        except Exception as e:
-            logger.error(f"Failed to load default scorer: {str(e)}")
-            raise HTTPException(status_code=503, detail=f"Failed to load scoring model: {str(e)}")
-    
-    return _default_scorer
 
 def get_scorer(model_name: Optional[str] = None) -> LeadScorer:
     """Get scorer instance for specific model."""
@@ -336,23 +356,6 @@ async def get_model_info(model_name: str):
         logger.error(f"Error getting model info: {str(e)}")
         raise HTTPException(status_code=404, detail=f"Model not found: {model_name}")
 
-# Startup and shutdown events
-@app.on_event("startup")
-async def startup_event():
-    """Initialize the application."""
-    logger.info("Starting LeadScore AI API...")
-    try:
-        # Pre-load default scorer
-        get_default_scorer()
-        logger.info("API startup completed successfully")
-    except Exception as e:
-        logger.error(f"API startup failed: {str(e)}")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up resources."""
-    logger.info("Shutting down LeadScore AI API...")
-    executor.shutdown(wait=True)
 
 if __name__ == "__main__":
     uvicorn.run(
