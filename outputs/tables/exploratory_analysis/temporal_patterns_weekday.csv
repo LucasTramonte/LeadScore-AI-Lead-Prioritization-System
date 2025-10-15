@@ -1,0 +1,8 @@
+created_weekday,converted_count,converted_sum,converted_mean,faturamento_anual_milhoes_mean,segmento_<lambda>,Weekday_Name
+0,36,19,0.528,26.508,Máquinas & Equipamentos,Monday
+1,43,22,0.512,27.37,Bens de Consumo,Tuesday
+2,39,15,0.385,30.859,Energia & Utilities,Wednesday
+3,54,26,0.481,26.896,Alimentos & Bebidas,Thursday
+4,39,21,0.538,33.564,Metalurgia,Friday
+5,54,23,0.426,24.115,Bens de Consumo,Saturday
+6,35,18,0.514,28.62,Alimentos & Bebidas,Sunday

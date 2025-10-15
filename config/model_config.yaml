@@ -1,0 +1,52 @@
+# Model Configuration for Aprix Lead Scoring System
+
+model:
+  type: "catboost"
+  parameters:
+    iterations: 500
+    learning_rate: 0.1
+    depth: 6
+    loss_function: "Logloss"
+    eval_metric: "AUC"
+    random_seed: 42
+    verbose: false
+
+features:
+  numeric:
+    - "annual_revenue_millions"
+    - "number_skus"
+    - "average_sector_margin"
+    - "emails_sent"
+    - "emails_opened"
+    - "emails_responded"
+    - "meetings_held"
+    - "days_since_first_touch"
+  
+  categorical:
+    - "segment"
+    - "contact_role"
+    - "lead_source"
+    - "crm_stage"
+
+preprocessing:
+  standard_scaler: true
+  one_hot_encoder:
+    drop_first: true
+    sparse_output: false
+
+scoring:
+  thresholds:
+    high: 0.7
+    medium: 0.4
+  
+validation:
+  test_size: 0.2
+  cv_folds: 5
+  stratify: true
+  random_state: 42
+
+paths:
+  data_raw: "data/raw/"
+  data_processed: "data/processed/"
+  models: "models/"
+  logs: "logs/"

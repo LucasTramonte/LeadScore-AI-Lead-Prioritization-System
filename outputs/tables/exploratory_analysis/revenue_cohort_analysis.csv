@@ -1,0 +1,5 @@
+revenue_cohort,converted_count,converted_sum,converted_mean,faturamento_anual_milhoes_mean,faturamento_anual_milhoes_median,faturamento_anual_milhoes_std,numero_SKUs_mean,numero_SKUs_median,margem_media_setor_mean,days_since_first_touch_mean,days_since_first_touch_median,days_since_first_touch_std,emails_enviados_mean,emails_enviados_sum,reunioes_realizadas_mean,reunioes_realizadas_sum,download_whitepaper_sum,download_whitepaper_mean,demo_solicitada_sum,demo_solicitada_mean,Total_Revenue_Impact,Average_Deal_Size,Sales_Velocity
+Large (50-100M),26,16,0.615,58.877,54.5,9.816,2373.308,2272.5,16.808,108.692,103.0,61.746,4.346,113,0.615,16,4,0.154,4,0.154,942.03,36.21,0.17
+Small (<10M),14,8,0.571,7.957,8.05,1.21,2013.571,1570.0,17.571,142.357,169.0,73.929,4.214,59,0.786,11,1,0.071,2,0.143,63.66,4.54,0.12
+Medium (10-50M),259,120,0.463,25.655,23.9,10.162,2546.722,2650.0,17.595,121.0,116.0,71.177,3.822,990,0.641,166,68,0.263,38,0.147,3078.6,11.88,0.115
+Enterprise (>100M),1,0,0.0,113.2,113.2,,3278.0,3278.0,25.0,153.0,153.0,,6.0,6,1.0,1,0,0.0,1,1.0,0.0,0.0,0.0

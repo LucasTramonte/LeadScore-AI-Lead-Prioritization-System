@@ -1,0 +1,38 @@
+# Base configuration for LeadScore AI system
+# This file contains default settings that apply to all environments
+
+data:
+  path: "data/raw/"
+  file_name: "data.xlsx"
+  sheet_name: 1
+
+model:
+  models_dir: "models"
+  test_size: 0.2
+  random_state: 42
+  cv_folds: 5
+  outlier_multiplier: 1.5
+
+feature_engineering:
+  engagement_weights:
+    email_weight: 0.2
+    meeting_weight: 0.6
+    demo_weight: 0.2
+
+api:
+  host: "localhost"
+  port: 8000
+  debug: false
+
+webhook:
+  host: "localhost"
+  port: 8001
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+output:
+  plots_dir: "outputs/plots"
+  tables_dir: "outputs/tables"
+  formats: ["png", "svg"]

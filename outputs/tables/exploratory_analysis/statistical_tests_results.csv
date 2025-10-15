@@ -1,0 +1,13 @@
+feature,ks_statistic,p_value,converted_mean,non_converted_mean,difference,cohens_d,significance_level,discrimination_strength
+days_since_first_touch,0.1667,0.027,108.6667,132.4551,-23.7885,-0.3419,*,Moderate
+numero_SKUs,0.1389,0.0991,2686.6528,2345.4936,341.1592,0.2476,ns,Moderate
+email_open_rate,0.1314,0.1351,0.6448,0.7092,-0.0644,-0.1911,ns,Moderate
+engagement_score,0.1186,0.2207,0.3684,0.3538,0.0147,0.0866,ns,Moderate
+faturamento_anual_milhoes,0.1079,0.3191,27.3611,28.5897,-1.2286,-0.0813,ns,Moderate
+company_size_score,0.0999,0.4103,0.4649,0.4557,0.0092,0.0795,ns,Weak
+emails_abertos,0.0994,0.4169,2.2292,2.4103,-0.1811,-0.1394,ns,Weak
+reunioes_realizadas,0.0871,0.5831,0.7083,0.5897,0.1186,0.1582,ns,Weak
+emails_enviados,0.0748,0.7606,3.9444,3.8462,0.0983,0.0506,ns,Weak
+email_response_rate,0.062,0.9137,0.4186,0.3902,0.0284,0.0692,ns,Weak
+margem_media_setor,0.0614,0.9186,17.25,17.8269,-0.5769,-0.1064,ns,Weak
+emails_respondidos,0.0176,1.0,0.8542,0.8462,0.008,0.0091,ns,Weak

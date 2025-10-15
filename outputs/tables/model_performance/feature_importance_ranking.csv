@@ -1,0 +1,18 @@
+Feature,Feature_Importance,Relative_Importance,Cumulative_Importance,Importance_Category
+days_since_first_touch,0.2526,1.0,0.2526,Critical
+company_quality_score,0.2457,0.9725,0.8332,Critical
+lead_quality_score,0.193,0.764,0.9026,High
+advanced_engagement_score,0.1418,0.5614,0.6914,High
+email_open_rate,0.0694,0.2745,0.4984,Medium
+segmento_Químicos & Plásticos,0.0301,0.1193,0.9888,Low
+segmento_Bens de Consumo,0.0234,0.0926,0.9327,Low
+crm_stage_Qualificado Vendas,0.0132,0.0523,0.9988,Low
+segmento_Metalurgia,0.0097,0.0383,0.979,Low
+crm_stage_Qualificado Marketing,0.0055,0.0217,0.9971,Low
+exporta,0.0042,0.0168,1.0,Low
+segmento_Máquinas & Equipamentos,0.0035,0.0139,0.9845,Low
+segmento_Energia & Utilities,0.0026,0.0103,0.9693,Low
+is_engaged_prospect,0.0022,0.0088,1.0,Low
+crm_stage_Novo,0.0017,0.0069,0.9923,Low
+crm_stage_Proposta,0.0012,0.0046,0.9949,Low
+segmento_Construção Civil,0.0,0.0,0.9561,Low

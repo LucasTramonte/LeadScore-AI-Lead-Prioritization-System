@@ -1,0 +1,6 @@
+sales_cycle_bucket,converted_count,converted_sum,converted_mean,faturamento_anual_milhoes_mean,faturamento_anual_milhoes_median,segmento_<lambda>
+0-30 days,39,29,0.744,28.182,23.4,Bens de Consumo
+31-60 days,36,18,0.5,25.294,21.0,Químicos & Plásticos
+61-90 days,36,16,0.444,26.692,22.8,Alimentos & Bebidas
+91-180 days,112,51,0.455,30.495,26.6,Alimentos & Bebidas
+180+ days,77,30,0.39,26.156,25.9,Construção Civil

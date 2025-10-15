@@ -1,0 +1,25 @@
+# Production environment configuration
+# Overrides base configuration for production
+
+logging:
+  level: "WARNING"
+
+api:
+  debug: false
+  port: 8000
+
+webhook:
+  port: 8001
+
+model:
+  # Use more trials for better optimization in production
+  optimization_trials: 100
+
+# Production-specific settings
+security:
+  enable_cors: false
+  allowed_origins: []
+
+performance:
+  max_workers: 4
+  batch_size: 1000

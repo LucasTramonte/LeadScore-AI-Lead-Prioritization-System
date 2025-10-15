@@ -1,0 +1,13 @@
+# Development environment configuration
+# Overrides base configuration for development
+
+logging:
+  level: "DEBUG"
+
+api:
+  debug: true
+  port: 8000
+
+model:
+  # Use fewer trials for faster development
+  optimization_trials: 10

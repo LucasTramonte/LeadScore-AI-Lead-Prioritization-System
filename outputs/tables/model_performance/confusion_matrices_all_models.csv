@@ -1,0 +1,9 @@
+Predicted_Negative,Predicted_Positive,Model
+19,12,CatBoost
+17,12,CatBoost
+21,10,Random Forest
+14,15,Random Forest
+24,7,Gradient Boosting
+17,12,Gradient Boosting
+18,13,Logistic Regression
+12,17,Logistic Regression
